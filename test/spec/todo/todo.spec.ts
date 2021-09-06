@@ -66,6 +66,39 @@ describe("POST /todo", () => {
   });
 });
 
+describe("GET /todos/:id", () => {
+  it("should fetch a todo item if it exists and if id is valid mongo id", async () => {
+    const todo = await testAppContext.todoRepository.save(
+      new TodoItem({ title: "Fetching an item" })
+    );
+
+    const res = await chai.request(expressApp).get(`/todos/${todo._id}`);
+
+    expect(res).to.have.status(200);
+    expect(res.body).to.have.property("id");
+    expect(res.body).to.have.property("title");
+  });
+
+  it("Should return a validation error if id is invalid mongo id", async () => {
+    const res = await chai.request(expressApp).get("/todos/jlkm129e2nk");
+
+    expect(res).to.have.status(400);
+    expect(res.body)
+      .to.have.nested.property("failures[0].message")
+      .to.equal(
+        "The specified todo ID is not a valid one. Please provide a valid one."
+      );
+  });
+
+  it("should return a 404 if todo item does not exists", async () => {
+    const res = await chai
+      .request(expressApp)
+      .get("/todos/605bb3efc93d78b7f4388c2c");
+
+    expect(res).to.have.status(404);
+  });
+});
+
 describe("PUT /todos/:id", () => {
   it("should update a todo item if it exists, if id is valid mongo id and if title is valid non-empty string", async () => {
     const todo= await testAppContext.todoRepository.save(
@@ -116,6 +149,24 @@ describe("PUT /todos/:id", () => {
     const res = await chai.request(expressApp).put("/todos/hhd8882nn").send({
       title: "Update TODO",
     });
+
+    expect(res).to.have.status(400);
+    expect(res.body)
+      .to.have.nested.property("failures[0].message")
+      .to.equal(
+        "The specified todo ID is not a valid one. Please provide a valid one."
+      );
+  });
+
+  it("should return a 404 if todo item does not exists", async () => {
+    const res = await chai
+      .request(expressApp)
+      .put("/todos/605bb3efc93d78b7f4335c2c")
+      .send({
+        title: "TODO_UPDATED",
+      });
+
+    expect(res).to.have.status(404);
   });
 });
 
@@ -138,16 +189,5 @@ describe("DELETE /todos/:id", () => {
       .to.equal(
         "The specified todo ID is not a valid one. Please provide a valid one."
       );
-  });
-
-  it("should return a 404 if todo item does not exists", async () => {
-    const res = await chai
-      .request(expressApp)
-      .put("/todos/605bb3efc93d78b7f4335c2c")
-      .send({
-        title: "TODO_UPDATED",
-      });
-
-    expect(res).to.have.status(404);
   });
 });
