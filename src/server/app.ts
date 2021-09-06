@@ -10,6 +10,7 @@ import {
   AccountController,
   BaseController,
   HealthCheckController,
+  TodoController,
 } from '@controllers';
 import { ErrorHandler } from '@middleware';
 import { EventListeners, logger } from '@server';
@@ -72,10 +73,10 @@ export class App {
       );
     }
 
-    this.expressApp.use(express.urlencoded({
+    this.expressApp.use(bodyParser.urlencoded({
       extended: true
     }));
-    this.expressApp.use(express.json());
+    this.expressApp.use(bodyParser.json());
   }
 
   public initializeErrorHandling() {
@@ -92,6 +93,7 @@ export class App {
     const controllers: BaseController[] = [
       new AccountController(this.ctx),
       new HealthCheckController(this.ctx),
+      new TodoController(this.ctx),
     ];
 
     for (const ctrl of controllers) {
