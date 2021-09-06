@@ -203,7 +203,6 @@ export class MongoStore implements IDataStore {
     if (modelFactory.getType() === typeof Account) {
       return account;
     }
-    
     return null;
   }
 }
