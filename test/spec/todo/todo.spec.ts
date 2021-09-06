@@ -116,6 +116,21 @@ describe("PUT /todos/:id", () => {
     const res = await chai.request(expressApp).put("/todos/hhd8882nn").send({
       title: "Update TODO",
     });
+  });
+});
+
+describe("DELETE /todos/:id", () => {
+  it("should delete a todo item if it exists and if ID it is valid.", async () => {
+    const todoItem = await testAppContext.todoRepository.save(
+      new TodoItem({ title: "Title to be deleted" })
+    );
+    const res = await chai.request(expressApp).delete(`/todos/${todoItem._id}`);
+
+    expect(res).to.have.status(204);
+  });
+
+  it("should return a validation error if id is not a valid ID.", async () => {
+    const res = await chai.request(expressApp).delete("/todos/2114071");
 
     expect(res).to.have.status(400);
     expect(res.body)
