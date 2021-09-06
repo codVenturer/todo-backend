@@ -2,6 +2,7 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import { Application } from 'express';
 import { TodoItem } from '../../../src/models';
+import { todoItem } from '../../../src/storage/mongoose';
 import {App} from '../../../src/server';
 import { respositoryContext, testAppContext } from '../../mocks/app-context';
 
@@ -62,5 +63,76 @@ describe("POST /todo", () => {
     expect(res).to.have.status(400);
     expect(res.body).to.have.property("message");
     expect(res.body).to.have.nested.property("failures[0].message").to.equal("This todo item already exists. Please try a new one.");
+  });
+});
+
+describe("PUT /todos/:id", () => {
+  it("should update a todo item if it exists, if id is valid mongo id and if title is valid non-empty string", async () => {
+    const todo= await testAppContext.todoRepository.save(
+      new TodoItem({ title: "Update TODO" })
+    );
+
+    const updatedItem = "Item Updated";
+
+    const res = await chai
+      .request(expressApp)
+      .put(`/todos/${todo._id}`)
+      .send({
+        title: updatedItem,
+      });
+
+    todoItem.find({ title: updatedItem }, function (err, data) {
+      expect(new TodoItem(data[0]).serialize().title).to.deep.equal(
+        updatedItem
+      );
+    });
+
+    expect(res).to.have.status(200);
+    expect(res.body).to.have.property("id");
+    expect(res.body).to.have.property("title");
+    expect(res.body.id).to.deep.equal(todo._id.toString());
+    expect(res.body.title).to.deep.equal(updatedItem);
+  });
+
+  it("should return a validation error if empty title is specified", async () => {
+    const todo = await testAppContext.todoRepository.save(
+      new TodoItem({ title: "TODO_TO_BE_UPDATED" })
+    );
+
+    const res = await chai
+      .request(expressApp)
+      .put(`/todos/${todo._id}`)
+      .send({
+        title: "",
+      });
+
+    expect(res).to.have.status(400);
+    expect(res.body)
+      .to.have.nested.property("failures[0].message")
+      .to.equal("The title is empty or the title is not a string.");
+  });
+
+  it("should return a validation error if id is invalid mongo id", async () => {
+    const res = await chai.request(expressApp).put("/todos/hhd8882nn").send({
+      title: "Update TODO",
+    });
+
+    expect(res).to.have.status(400);
+    expect(res.body)
+      .to.have.nested.property("failures[0].message")
+      .to.equal(
+        "The specified todo ID is not a valid one. Please provide a valid one."
+      );
+  });
+
+  it("should return a 404 if todo item does not exists", async () => {
+    const res = await chai
+      .request(expressApp)
+      .put("/todos/605bb3efc93d78b7f4335c2c")
+      .send({
+        title: "TODO_UPDATED",
+      });
+
+    expect(res).to.have.status(404);
   });
 });
