@@ -1,9 +1,9 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import { Application } from 'express';
-import {TodoItem} from '../../../src/models';
+import { TodoItem } from '../../../src/models';
 import {App} from '../../../src/server';
-import {respositoryContext, testAppContext} from '../../mocks/app-context';
+import { respositoryContext, testAppContext } from '../../mocks/app-context';
 
 chai.use(chaiHttp);
 const expect  = chai.expect;

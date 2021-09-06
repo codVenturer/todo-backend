@@ -10,7 +10,7 @@ import {
   AccountController,
   BaseController,
   HealthCheckController,
-  TodoController,
+  TodoController
 } from '@controllers';
 import { ErrorHandler } from '@middleware';
 import { EventListeners, logger } from '@server';
