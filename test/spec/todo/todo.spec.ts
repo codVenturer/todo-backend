@@ -64,3 +64,26 @@ describe("POST /todo", () => {
     expect(res.body).to.have.nested.property("failures[0].message").to.equal("This todo item already exists. Please try a new one.");
   });
 });
+
+
+describe("DELETE /todos/:id", () => {
+  it("should delete a todo item if it exists and if ID it is valid.", async () => {
+    const todoItem = await testAppContext.todoRepository.save(
+      new TodoItem({ title: "Title to be deleted" })
+    );
+    const res = await chai.request(expressApp).delete(`/todos/${todoItem._id}`);
+
+    expect(res).to.have.status(204);
+  });
+
+  it("should return a validation error if id is not a valid ID.", async () => {
+    const res = await chai.request(expressApp).delete("/todos/2114071");
+
+    expect(res).to.have.status(400);
+    expect(res.body)
+      .to.have.nested.property("failures[0].message")
+      .to.equal(
+        "The specified todo ID is not a valid one. Please provide a valid one."
+      );
+  });
+});
