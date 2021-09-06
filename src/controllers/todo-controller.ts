@@ -62,7 +62,14 @@ export class TodoController extends BaseController {
     }
 
     const { id } = req.params;
-    const todo = await this.appContext.todoRepository.findById(id);
-    res.status(200).send(todo.serialize());
+    const todo = await this.appContext.todoRepository.findOne({ _id: id });
+    if (todo._id) {
+      res.status(200).json(todo.serialize());
+    } else {
+      const valError = new Errors.NotFoundError(
+        res.__("DEFAULT_ERRORS.VALIDATION_FAILED")
+      );
+      next(valError);
+    }
   }
 }
