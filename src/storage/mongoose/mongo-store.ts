@@ -8,9 +8,10 @@ import {
   Mongoose,
   Types,
 } from 'mongoose';
-import { Account, BaseModel, ModelFactory } from '@models';
+import { Account, BaseModel, ModelFactory, TodoItem } from '@models';
 import { IDataStore, QueryOptions, DeleteResult } from '@storage';
 import { LooseObject } from '@typings';
+import todoItem from './todo-item';
 
 export class MongoStore implements IDataStore {
   public connect(): Promise<Mongoose> {
@@ -196,6 +197,9 @@ export class MongoStore implements IDataStore {
   private getModel<T extends BaseModel>(
     modelFactory: ModelFactory<T>,
   ): MongoosModel<Document> {
+    if (modelFactory.getType() === typeof TodoItem) {
+      return todoItem;
+    }
     if (modelFactory.getType() === typeof Account) {
       return account;
     }
