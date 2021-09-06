@@ -197,12 +197,13 @@ export class MongoStore implements IDataStore {
   private getModel<T extends BaseModel>(
     modelFactory: ModelFactory<T>,
   ): MongoosModel<Document> {
-    if (modelFactory.getType() === typeof Account) {
-      return account;
-    }
     if (modelFactory.getType() === typeof TodoItem) {
       return todoItem;
     }
+    if (modelFactory.getType() === typeof Account) {
+      return account;
+    }
+    
     return null;
   }
 }
