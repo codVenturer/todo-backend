@@ -28,6 +28,8 @@ export class TodoController extends BaseController {
     this.router.put(`${this.basePath}/:id`, updateTodoValidator(this.appContext), this.updateTodo);
     
     this.router.delete(`${this.basePath}/:id`,deleteTodoValidator(this.appContext), this.deleteTodo);
+
+    this.router.get(`${this.basePath}`, this.listTodoItems);
   }
 
   private createTodo = async (
@@ -126,5 +128,23 @@ export class TodoController extends BaseController {
       );
       next(valError);
     }
+  }
+
+  private listTodoItems = async (
+    req: ExtendedRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const failures: ValidationFailure[] = Validation.extractValidationErrors(req);
+    if (failures.length > 0) {
+      const valError = new Errors.ValidationError(
+        res.__('DEFAULT_ERRORS.VALIDATION_FAILED'),
+        failures,
+      );
+      return next(valError);
+    }
+
+    const todoItems = await this.appContext.todoRepository.getAll({});
+    res.status(200).send(todoItems);
   }
 }

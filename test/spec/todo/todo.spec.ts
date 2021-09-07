@@ -191,3 +191,24 @@ describe("DELETE /todos/:id", () => {
       );
   });
 });
+
+describe("GET /todos", () => {
+  it("should have got all the todo items", async () => {
+    const res = await chai.request(expressApp).get("/todos");
+
+    expect(res).to.have.status(200);
+    expect(res.body).to.be.an("array");
+  });
+
+  it("should check if the array returned is empty when there are no todo items", async () => {
+    await testAppContext.todoRepository.getAll();
+
+    await testAppContext.todoRepository.deleteMany({});
+
+    const res = await chai.request(expressApp).get("/todos");
+
+    expect(res).to.have.status(200);
+    expect(res.body).to.be.an("array");
+    expect(res.body).to.deep.equal([]);
+  });
+});
